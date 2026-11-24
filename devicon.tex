@@ -1,0 +1,91 @@
+% !TeX program = pdflatex
+% SPDX-License-Identifier: MIT
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=23mm]{geometry}
+\usepackage{xcolor}
+\usepackage{multicol}
+\usepackage{devicon}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{exampleblue}{HTML}{235EA3}
+\newcommand{\DeviconCatalogEntry}[1]{%
+  \noindent\makebox[1.8em][l]{\devicon{#1}}%
+  {\footnotesize\ttfamily\detokenize{#1}}\par
+}
+\title{Devicon for \LaTeX}
+\author{}
+\date{Version 0.2.0 \quad $\bullet$ \quad 24 November 2026}
+
+\begin{document}
+\maketitle
+\noindent
+Use the Devicon icon font for programming languages and development tools in
+documents compiled with pdfLaTeX, XeLaTeX or LuaLaTeX. This package bundles Devicon
+v2.18.0 from upstream revision \texttt{32fe1d3}.
+
+\section{Getting started}
+To try the example, upload the Overleaf release ZIP through
+\textbf{New Project} $\to$ \textbf{Upload Project} and compile
+\texttt{example.tex} with pdfLaTeX.
+
+\subsection{Add Devicon to an existing Overleaf project}
+Extract the Overleaf ZIP or open the \texttt{devicon/} folder in the
+extracted CTAN archive. Use \textbf{Upload} in Overleaf's file list and put
+the following files in the project root, alongside your main \texttt{.tex} file.
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parsep}{0pt}
+  \item[$\bullet$] \texttt{devicon.sty}, \texttt{devicon-glyphs.def}, \texttt{devicon-2.18.0.ttf}
+  \item[$\bullet$] \texttt{devicon-pdftex.map} and all six \verb|devicon-2-18-0-*.enc|
+    and six \verb|devicon-2-18-0-*.tfm| files
+\end{itemize}
+Add \verb|\usepackage{devicon}| to your preamble and a \verb|\devicon{...}|
+command in the document body. Click \textbf{Recompile}. For local TEXMF
+installation paths, see \texttt{README.md}.
+
+\begin{verbatim}
+\documentclass{article}
+\usepackage{devicon}
+\begin{document}
+\devicon{python-plain} Python
+\end{document}
+\end{verbatim}
+
+\subsection{When Overleaf includes Devicon}
+After CTAN publishes Devicon, TeX Live can add it to the distribution.
+You can load it directly once your project's TeX Live version includes it.
+Standard Overleaf updates annually, and the opt-in Rolling TeX Live
+experiment uses monthly builds. See the
+\href{https://docs.overleaf.com/troubleshooting-and-support/tex-live}{Overleaf TeX Live documentation}.
+
+\section{Using icons}
+\verb|\devicon{python-plain}| produces \devicon{python-plain}.
+Names are case-sensitive. The CSS prefix \texttt{devicon-} is optional.
+Choose the font variant shown in the catalog, including
+its suffix such as \texttt{-plain} or \texttt{-original}.
+
+\medskip\noindent
+Icons inherit the current text size and color. For example,
+\verb|{\Large\devicon{git-plain}}| changes size and
+\verb|\textcolor{blue}{\devicon{git-plain}}| colors the glyph using
+\texttt{xcolor}, as in \textcolor{exampleblue}{\devicon{git-plain}}.
+The font provides single-color glyphs.
+Keep a text label beside any icon that conveys information. The icon itself
+is omitted from \texttt{hyperref} PDF bookmarks.
+
+\section{Credits and license}
+The package code is released under the MIT License. The bundled Devicon font
+and its source are from \href{https://github.com/devicons/devicon}{Devicon}
+and retain the upstream MIT license. Product names
+and logos belong to their respective owners. Follow the relevant brand policies
+when using the icons. See \texttt{LICENSE} and \texttt{LICENSE-DEVICON}.
+
+\clearpage
+\section{Icon catalog}
+The entries below are the font names accepted by \verb|\devicon|.
+\begin{multicols}{2}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1pt}
+\input{devicon-catalog.tex}
+\end{multicols}
+\end{document}
