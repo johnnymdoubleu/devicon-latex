@@ -1,6 +1,6 @@
 # Devicon for LaTeX
 
-Version 0.2.0 · 24 November 2026
+Version 0.2.2 · 27 November 2026
 
 `devicon` makes the [Devicon](https://devicon.dev/) font available in pdfLaTeX,
 XeLaTeX and LuaLaTeX as `\devicon{<name>}`. The package uses the font and CSS names
@@ -12,7 +12,7 @@ The glyphs take the current text size and color.
 \documentclass{article}
 \usepackage{devicon}
 \begin{document}
-\devicon{python-plain} Python \quad \devicon{github-original} GitHub
+\devicon[artifact]{python-plain} Python \quad \devicon[artifact]{github-original} GitHub
 \end{document}
 ```
 
@@ -66,8 +66,7 @@ and subject to CTAN acceptance, TeX Live inclusion, and Overleaf's schedule.
 - The manual `devicon.pdf` lists all accepted names. The command also accepts
   the full CSS class, such as `\devicon{devicon-python-plain}`.
 - Use `\textcolor{blue}{\devicon{git-plain}}` with `xcolor` for a single-color
-  glyph. Use the font variants listed in the manual. Keep a text label for
-  meaningful icons.
+  glyph. Use the font variants listed in the manual.
 
 For a local TEXMF installation, put the files in these directories and
 refresh the filename database if your TeX distribution requires it.
@@ -79,6 +78,26 @@ refresh the filename database if your TeX distribution requires it.
 | `.tfm` | `fonts/tfm/public/devicon/` |
 | `.enc` | `fonts/enc/dvips/devicon/` |
 | `.map` | `fonts/map/pdftex/devicon/` |
+
+## Accessible icons
+
+Devicon glyphs use Unicode Private Use Area code points. `\devicon` supplies
+PDF `ActualText` so those code points have readable replacement text. The
+default comes from the icon name, with the variant suffix removed. Use
+`actualtext` with plain text when the label or the meaning depends on context.
+When nearby text already conveys the meaning, use `artifact`.
+
+```latex
+\devicon[actualtext={GitHub}]{github-original}
+\devicon[artifact]{github-original} GitHub
+```
+
+In a document with LaTeX PDF tagging active, meaningful icons use a `Span`
+with replacement text and decorative icons are marked as artifacts. In other
+PDFs, `accsupp` supplies replacement text and suppresses extraction of
+decorative icons. Document-wide accessibility still needs a tagged document
+and validation of the finished PDF.
+[LaTeX tagging guidance](https://tagging-project.latex-project.org/documentation/usage-instructions)
 
 ## Build a release
 
@@ -106,7 +125,7 @@ with LuaLaTeX. The build writes these files to `dist/`:
 
 | File | Purpose |
 | --- | --- |
-| `devicon-overleaf.zip` | Example project and runtime files |
+| `devicon-overleaf.zip` | Example project, runtime files, README and PDF manual |
 | `devicon-ctan.zip` | CTAN archive with the package, documentation and sources |
 | `devicon.pdf` | Manual and complete icon catalog |
 

@@ -221,7 +221,10 @@ def main():
             release_files = [str(path.relative_to(stage)) for path in stage.rglob("*") if path.is_file()]
             write_zip(work / "devicon-ctan.zip", stage, release_files, prefix="devicon/")
             pdftex_files = [path.name for pattern in ("*.enc", "*.tfm") for path in stage.glob(pattern)]
-            project_files = (*RUNTIME_FILES, PDFTEX_MAP, *pdftex_files, "example.tex", "LICENSE", "LICENSE-DEVICON")
+            project_files = (
+                *RUNTIME_FILES, PDFTEX_MAP, *pdftex_files,
+                "example.tex", "README.md", "devicon.pdf", "LICENSE", "LICENSE-DEVICON",
+            )
             write_zip(work / "devicon-overleaf.zip", stage, project_files)
             for name in ("devicon-ctan.zip", "devicon-overleaf.zip"):
                 (work / name).replace(destination / name)

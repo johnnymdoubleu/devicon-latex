@@ -1,7 +1,9 @@
 % SPDX-License-Identifier: MIT
 \NeedsTeXFormat{LaTeX2e}[2021-06-01]
-\ProvidesExplPackage{devicon}{2026-11-24}{0.2.0}
+\ProvidesExplPackage{devicon}{2026-11-27}{0.2.2}
   {Devicon glyphs for pdfLaTeX, XeLaTeX and LuaLaTeX}
+
+\RequirePackage{accsupp}
 
 \msg_new:nnnn { devicon } { unsupported-engine }
   { The~devicon~package~requires~pdfLaTeX,~XeLaTeX~or~LuaLaTeX. }
@@ -15,6 +17,17 @@
   { Use~a~case-sensitive~name~listed~in~the~devicon~manual. }
 
 \tl_new:N \l__devicon_name_tl
+\tl_new:N \l__devicon_actualtext_tl
+\str_new:N \l__devicon_actualtext_hex_str
+\bool_new:N \l__devicon_artifact_bool
+\keys_define:nn { devicon }
+  {
+    actualtext .tl_set:N = \l__devicon_actualtext_tl,
+    actualtext .value_required:n = true,
+    artifact .bool_set:N = \l__devicon_artifact_bool,
+    artifact .default:n = true,
+  }
+
 \cs_new_protected:Npn \__devicon_declare:nnnn #1#2#3#4
   { \cs_new:cpn { __devicon_glyph_#1: } { \__devicon_glyph:nnn {#2} {#3} {#4} } }
 
@@ -52,24 +65,75 @@
   { \file_input:n { devicon-glyphs.def } }
   { \msg_fatal:nn { devicon } { missing-map } }
 
-\cs_new_protected:Npn \__devicon_print:n #1
+\cs_new_protected:Npn \__devicon_untagged:nn #1#2
   {
-    \tl_set:Nx \l__devicon_name_tl { \tl_trim_spaces:n {#1} }
+    \str_set_convert:Nnnn \l__devicon_actualtext_hex_str {#1}
+      { default } { utf16 / hex }
+    \BeginAccSupp
+      { method=hex, unicode=false, space=false, ActualText=\l__devicon_actualtext_hex_str }
+    #2
+    \EndAccSupp { }
+  }
+
+\cs_new_protected:Npn \__devicon_tagged:nn #1#2
+  {
+    \tag_mc_end_push:
+    \bool_if:NTF \l__devicon_artifact_bool
+      {
+        \tag_mc_begin:n { artifact }
+        #2
+        \tag_mc_end:
+      }
+      {
+        \tag_struct_begin:n { tag=Span }
+        \tag_mc_begin:n { actualtext={#1} }
+        #2
+        \tag_mc_end:
+        \tag_struct_end:
+      }
+    \tag_mc_begin_pop:n { }
+  }
+
+\cs_new_protected:Npn \__devicon_print:nn #1#2
+  {
+    \tl_set:Nx \l__devicon_name_tl { \tl_trim_spaces:n {#2} }
     \tl_set:Nx \l__devicon_name_tl { \tl_to_str:V \l__devicon_name_tl }
     \cs_if_exist:cF { __devicon_glyph_\l__devicon_name_tl : }
       { \regex_replace_once:nnN { \A devicon- } { } \l__devicon_name_tl }
     \cs_if_exist:cTF { __devicon_glyph_\l__devicon_name_tl : }
       {
         \mode_leave_vertical:
-        \hbox:n { \use:c { __devicon_glyph_\l__devicon_name_tl : } }
+        \group_begin:
+        \tl_set_eq:NN \l__devicon_actualtext_tl \l__devicon_name_tl
+        \regex_replace_once:nnN { -(plain|original|line)(-wordmark)?\Z | -wordmark\Z }
+          { } \l__devicon_actualtext_tl
+        \regex_replace_all:nnN { [-_] } { \c{c_space_tl} } \l__devicon_actualtext_tl
+        \tl_set:Nx \l__devicon_actualtext_tl { \l__devicon_actualtext_tl }
+        \keys_set:nn { devicon } {#1}
+        \tl_if_blank:VT \l__devicon_actualtext_tl { \bool_set_true:N \l__devicon_artifact_bool }
+        \bool_if:NT \l__devicon_artifact_bool { \tl_clear:N \l__devicon_actualtext_tl }
+        \bool_lazy_and:nnTF { \cs_if_exist_p:N \tag_if_active_p: } { \tag_if_active_p: }
+          {
+            \exp_args:NV \__devicon_tagged:nn \l__devicon_actualtext_tl
+              { \hbox:n { \use:c { __devicon_glyph_\l__devicon_name_tl : } } }
+          }
+          {
+            \hbox:n
+              {
+                \exp_args:NV \__devicon_untagged:nn \l__devicon_actualtext_tl
+                  { \use:c { __devicon_glyph_\l__devicon_name_tl : } }
+              }
+          }
+        \group_end:
       }
-      { \msg_error:nnx { devicon } { unknown-icon } { \tl_to_str:n {#1} } }
+      { \msg_error:nnx { devicon } { unknown-icon } { \tl_to_str:n {#2} } }
   }
 
-\NewDocumentCommand \devicon { m } { \__devicon_print:n {#1} }
+\NewDocumentCommand \devicon { O{} m } { \__devicon_print:nn {#1} {#2} }
 
-% Private-use glyphs are decorative in PDF bookmarks.
+% Skip both the key list and the icon name in PDF bookmarks.
+\NewExpandableDocumentCommand \__devicon_bookmark:w { o m } { }
 \AddToHook { package/hyperref/after } [ devicon ]
-  { \pdfstringdefDisableCommands { \def\devicon#1{} } }
+  { \pdfstringdefDisableCommands { \let\devicon\__devicon_bookmark:w } }
 
 \endinput
